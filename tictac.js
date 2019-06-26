@@ -1,83 +1,26 @@
+//setup canvas
 const canvas = document.getElementById("tictac");
 const ctx = canvas.getContext("2d");
 ctx.globalCompositeOperation = "source-over";
 canvas.height = window.innerHeight;
-// console.log(canvas.height)
-// console.log(window.innerHeight);
 canvas.width = window.innerWidth;
 canvas.position = "absolute";
-var team = true;
 
+
+//background image
 var image = new Image();
 image.src = "black.png";
 
+//required
+var team = true;
 const width = 160;
 const gap = 8;
 var gameOver = false;
-start = true
-
-image.onload = function(){
-    ctx.drawImage(image, 300, 100, 500,500);
-    xstart = 300;
-    ystart = 100;
-    window.addEventListener("click", e => {
-        if(!gameOver){
-            console.log(e.x, e.y)
-            if(e.x>xstart && e.x<xstart+width && e.y>ystart && e.y<ystart+width && !box1.checked){
-                check(box1, team)
-            }
-
-            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart && e.y<ystart+width && !box2.checked){
-                check(box2, team)
-            }
-
-            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart && e.y<ystart+width && !box3.checked){
-                check(box3, team)
-            }
-
-            else if(e.x>xstart && e.x<xstart+width && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box4.checked){
-                check(box4, team)
-            }
-
-            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box5.checked){
-                check(box5, team)
-            }
-
-            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box6.checked){
-                check(box6, team)
-            }
-            
-            else if(e.x>xstart && e.x<xstart+width && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box7.checked){
-                check(box7, team)
-            }
-            
-            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box8.checked){
-                check(box8, team)
-            }
-
-            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box9.checked){
-                check(box9, team)
-            }
-
-            else{
-                console.log("Invalid Move");
-                team = !team;
-            }
-            team = !team;
-        }
-    });
-}
-
-window.onclick=function(){
-    if(gameOver){
-        console.log('gameOver')
-        location.reload();
-    }
-}
+var start = true
 
 
-box =[]
 
+//box properties
 var box1={
     x: 340,
     y:220,
@@ -141,6 +84,7 @@ var box9={
     team: null
 }
 
+box = []
 box[1] = box1
 box[2] = box2
 box[3] = box3
@@ -151,6 +95,98 @@ box[7] = box7
 box[8] = box8
 box[9] = box9
 
+turn(team);
+//start game
+image.onload = function(){
+    ctx.drawImage(image, 300, 100, 500,500);
+    xstart = 300;
+    ystart = 100;
+    window.addEventListener("click", e => {
+        if(!gameOver){
+            console.log(e.x, e.y)
+
+            //clear error
+            ctx.fillStyle = "Black";
+            ctx.fillRect(378,613, 800,608);
+
+            if(e.x>xstart && e.x<xstart+width && e.y>ystart && e.y<ystart+width && !box1.checked){
+                check(box1, team)
+            }
+
+            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart && e.y<ystart+width && !box2.checked){
+                check(box2, team)
+            }
+
+            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart && e.y<ystart+width && !box3.checked){
+                check(box3, team)
+            }
+
+            else if(e.x>xstart && e.x<xstart+width && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box4.checked){
+                check(box4, team)
+            }
+
+            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box5.checked){
+                check(box5, team)
+            }
+
+            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box6.checked){
+                check(box6, team)
+            }
+            
+            else if(e.x>xstart && e.x<xstart+width && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box7.checked){
+                check(box7, team)
+            }
+            
+            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box8.checked){
+                check(box8, team)
+            }
+
+            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box9.checked){
+                check(box9, team)
+            }
+
+            else{
+                console.log("Invalid Move");
+                team = !team;
+                ctx.fillStyle = '#00B4EB';
+                ctx.font = "50px Courier"
+                ctx.fillText("Invalid Move", 390,647);
+            }
+            team = !team;
+            console.log(team)
+            turn(team);
+        }
+    });
+}
+
+
+//turn
+function turn(team){
+    if(team){
+        ctx.fillStyle = "black";
+        ctx.fillRect(820,290,945,290)
+        ctx.fillStyle = "orange";
+        ctx.font = "30px Arial"
+        ctx.fillText("X",62,350);
+    }
+    if(!team){
+        ctx.fillStyle = "black";
+        ctx.fillRect(34,290,155,290)
+        ctx.fillStyle = "green";
+        ctx.font = "30px Arial"
+        ctx.fillText("O",1000,350);
+    }
+}
+
+
+
+//if game over
+window.onclick=function(){
+    if(gameOver){
+        console.log('gameOver')
+        location.reload();
+    }
+}
 
 
 function check(box, team){
@@ -249,7 +285,8 @@ function checkWinner(){
             gameOver= true;
         }
     }
-    //if all checked
+
+    //if all checked 
     for(i=1;i<10;i++){
         if(box[i].checked)
             flag+=1;
@@ -263,4 +300,3 @@ function checkWinner(){
         gameOver = true;
     }
 }
-const colors = ['orange', 'blue'];
