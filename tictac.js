@@ -249,6 +249,7 @@ function checkWinner(){
             gameOver= true;
         }
     }
+    //if all checked
     for(i=1;i<10;i++){
         if(box[i].checked)
             flag+=1;
