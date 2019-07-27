@@ -6,6 +6,8 @@ canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 canvas.position = "absolute";
 
+// on window's resize
+
 
 //background image
 var image = new Image();
@@ -16,7 +18,8 @@ var team = true;
 const width = 160;
 const gap = 8;
 var gameOver = false;
-var start = true
+var start = true;
+var okayToMove = true;
 
 
 
@@ -95,68 +98,118 @@ box[7] = box7
 box[8] = box8
 box[9] = box9
 
+unchecked=[]
+var invalid = false;
 turn(team);
+
+multiplayer = false;
+
+
 //start game
 image.onload = function(){
     ctx.drawImage(image, 300, 100, 500,500);
     xstart = 300;
     ystart = 100;
     window.addEventListener("click", e => {
-        if(!gameOver){
-            console.log(e.x, e.y)
-
-            //clear error
-            ctx.fillStyle = "Black";
-            ctx.fillRect(378,613, 800,608);
-
-            if(e.x>xstart && e.x<xstart+width && e.y>ystart && e.y<ystart+width && !box1.checked){
-                check(box1, team)
+        if(!multiplayer){
+            if(!gameOver && team && okayToMove){
+                userplay(e);
+                // wait(1000);
             }
-
-            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart && e.y<ystart+width && !box2.checked){
-                check(box2, team)
+            // wait(1000);
+            if(!gameOver && !invalid && !team){
+                setTimeout(()=>moveAI(),1000)
             }
-
-            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart && e.y<ystart+width && !box3.checked){
-                check(box3, team)
+            invalid = false; 
+        }
+        else{
+            if(!gameOver){
+                userplay(e);
             }
-
-            else if(e.x>xstart && e.x<xstart+width && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box4.checked){
-                check(box4, team)
-            }
-
-            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box5.checked){
-                check(box5, team)
-            }
-
-            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box6.checked){
-                check(box6, team)
-            }
-            
-            else if(e.x>xstart && e.x<xstart+width && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box7.checked){
-                check(box7, team)
-            }
-            
-            else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box8.checked){
-                check(box8, team)
-            }
-
-            else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box9.checked){
-                check(box9, team)
-            }
-
-            else{
-                console.log("Invalid Move");
-                team = !team;
-                ctx.fillStyle = '#00B4EB';
-                ctx.font = "50px Courier"
-                ctx.fillText("Invalid Move", 390,647);
-            }
-            team = !team;
-            console.log(team)
-            turn(team);
         }
     });
+}
+
+//gameplay
+function userplay(e){
+    // console.log(e.x, e.y)
+
+    //clear error
+    ctx.fillStyle = "Black";
+    ctx.fillRect(378,613, 800,608);
+
+    if(e.x>xstart && e.x<xstart+width && e.y>ystart && e.y<ystart+width && !box1.checked){
+        check(box[1], team)
+    }
+
+    else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart && e.y<ystart+width && !box2.checked){
+        check(box[2],team)
+    }
+
+    else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart && e.y<ystart+width && !box3.checked){
+        check(box[3], team)
+    }
+
+    else if(e.x>xstart && e.x<xstart+width && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box4.checked){
+        check(box[4], team)
+    }
+
+    else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box5.checked){
+        check(box[5], team)
+    }
+
+    else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box6.checked){
+        check(box[6], team)
+    }
+    
+    else if(e.x>xstart && e.x<xstart+width && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box7.checked){
+        check(box[7], team)
+    }
+    
+    else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box8.checked){
+        check(box[8], team)
+    }
+
+    else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box9.checked){
+        check(box[9], team)
+    }
+
+    else{
+        console.log("Invalid Move");
+        ctx.fillStyle = '#00B4EB';
+        ctx.font = "50px Courier"
+        ctx.fillText("Invalid Move", 390,647);
+        invalid = true
+        team = !team
+        okayToMove = false
+    }
+
+    //for single player
+    okayToMove = !okayToMove
+    
+    team = !team
+    console.log(team)
+};
+
+
+
+//AI's move
+function moveAI(){
+    // team = !team;
+    unchecked=[];
+    console.log(team)
+    for(i=1;i<10;i++){
+        if(!box[i].checked && !team){
+            unchecked.push(box[i]);
+        }
+    }
+    if(!box[5].checked && !team)
+        check(box[5],team)
+    else{
+        check(unchecked[Math.floor(Math.random()*unchecked.length)],team)
+    }
+    team = true;
+    okayToMove = true;
 }
 
 
@@ -202,7 +255,12 @@ function check(box, team){
         ctx.fillText("O", box.x, box.y);
     }
     checkWinner();
+    if(!gameOver)
+        turn(!team);
+    // wait(1000)
 }
+
+
 
 function checkWinner(){
     var k =0;
@@ -226,6 +284,7 @@ function checkWinner(){
                 ctx.stroke();
             }
             gameOver= true;
+            console.log('gameOver')
         }
         
         //horizontal
@@ -245,7 +304,8 @@ function checkWinner(){
                 ctx.strokeStyle ="green";
                 ctx.stroke();
             }
-            gameOver=true
+            gameOver=true;
+            console.log('gameOver')
         }
         k+=2;
 
@@ -265,6 +325,7 @@ function checkWinner(){
                 ctx.stroke();
             }
             gameOver= true;
+            console.log('gameOver')
         }
         
         //diagonal
@@ -283,6 +344,7 @@ function checkWinner(){
                 ctx.stroke();
             }
             gameOver= true;
+            console.log('gameOver')
         }
     }
 
@@ -298,5 +360,15 @@ function checkWinner(){
     }
     if(flag>8){
         gameOver = true;
+        console.log('gameOver')
     }
 }
+
+//wait
+function wait(ms){
+    var start = new Date().getTime();
+    var end = start;
+    while(end < start + ms) {
+      end = new Date().getTime();
+   }
+};
