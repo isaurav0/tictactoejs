@@ -1,0 +1,19 @@
+{
+  "name": "tictactoejs",
+  "version": "1.0.0",
+  "description": "A simple multiplayer game made using html5 canvas and JavaScript",
+  "main": "tictac.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isaurav0/tictactoejs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/isaurav0/tictactoejs/issues"
+  },
+  "homepage": "https://github.com/isaurav0/tictactoejs#readme"
+}
