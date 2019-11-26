@@ -6,6 +6,11 @@ canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 canvas.position = "absolute";
 
+//setup online multiplayer
+const socket = io.connect("localhost:3000")
+
+
+
 // on window's resize
 
 
@@ -102,7 +107,7 @@ unchecked=[]
 var invalid = false;
 turn(team);
 
-multiplayer = false;
+multiplayer = true;
 
 
 //start game
