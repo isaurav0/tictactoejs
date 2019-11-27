@@ -1,17 +1,37 @@
 var gameStart = false
+const socket = io.connect("localhost:3000");
 
+//setup multiplayer
 function respond(choice){
     var roomname = document.getElementById('roomname').value;
     if(choice=='create' && roomname.length!=0){
-        const socket = io.connect("localhost:3000");
         console.log('room created: ',roomname)
         socket.emit('create', roomname);
-        
+        socket.on('wait', (success)=>{
+            if(success)
+                console.log('waiting')
+            else
+                console.log('room already exists')
+        })
     }
     else{
-        var roomname = ''
+        socket.emit('join', roomname);
+        console.log('room joined: ', roomname)
     }
 }
+
+
+socket.on('gameStart', (success)=>{
+    if(success){
+        console.log('game Start Now');
+        gameStart = true
+    }
+    else{
+        console.log('room is full.')
+        gameStart = false
+    }
+})
+
 
 //setup canvas
 const canvas = document.getElementById("tictac");
