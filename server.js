@@ -13,6 +13,12 @@ const server = app.listen(3000, ()=>{
 io = socket(server)
 
 io.on('connection', ()=>{
-    console.log('socket connected')
-    
+    console.log('socket connected')    
+    io.on('create', room=>{
+        socket.join(room)
+        console.log('created room: '+room)
+    })
+
 })
+
+// io.sockets.in(room).emit('event', data);

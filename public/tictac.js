@@ -1,3 +1,18 @@
+var gameStart = false
+
+function respond(choice){
+    var roomname = document.getElementById('roomname').value;
+    if(choice=='create' && roomname.length!=0){
+        const socket = io.connect("localhost:3000");
+        console.log('room created: ',roomname)
+        socket.emit('create', roomname);
+        
+    }
+    else{
+        var roomname = ''
+    }
+}
+
 //setup canvas
 const canvas = document.getElementById("tictac");
 const ctx = canvas.getContext("2d");
@@ -6,12 +21,7 @@ canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 canvas.position = "absolute";
 
-//setup online multiplayer
-const socket = io.connect("localhost:3000")
 
-
-
-// on window's resize
 
 
 //background image
@@ -27,6 +37,40 @@ var start = true;
 var okayToMove = true;
 
 
+unchecked=[]
+var invalid = false;
+turn(team);
+multiplayer = true;
+
+
+//start game
+image.onload = function(){
+    ctx.drawImage(image, 300, 100, 500,500);
+    xstart = 300;
+    ystart = 100;
+    window.addEventListener("click", e => {
+        if(gameStart){
+            if(!multiplayer){
+                if(!gameOver && team && okayToMove){
+                    userplay(e);
+                    // wait(1000);
+                }
+                // wait(1000);
+                if(!gameOver && !invalid && !team){
+                    setTimeout(()=>moveAI(),1000)
+                }
+                invalid = false; 
+            }
+            else{
+                if(!gameOver){
+                    userplay(e);
+                }
+            }
+        }
+    });
+}
+
+//boxes 
 
 //box properties
 var box1={
@@ -102,38 +146,6 @@ box[6] = box6
 box[7] = box7
 box[8] = box8
 box[9] = box9
-
-unchecked=[]
-var invalid = false;
-turn(team);
-
-multiplayer = true;
-
-
-//start game
-image.onload = function(){
-    ctx.drawImage(image, 300, 100, 500,500);
-    xstart = 300;
-    ystart = 100;
-    window.addEventListener("click", e => {
-        if(!multiplayer){
-            if(!gameOver && team && okayToMove){
-                userplay(e);
-                // wait(1000);
-            }
-            // wait(1000);
-            if(!gameOver && !invalid && !team){
-                setTimeout(()=>moveAI(),1000)
-            }
-            invalid = false; 
-        }
-        else{
-            if(!gameOver){
-                userplay(e);
-            }
-        }
-    });
-}
 
 //gameplay
 function userplay(e){
