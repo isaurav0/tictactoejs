@@ -62,9 +62,11 @@ io.on('connection', (socket)=>{
     // })
 
     socket.on('turn', (data)=>{
-        console.log('team : ', data.team)
-        console.log('click: ', data.click.x)
+        var room = data.room
+        console.log('moved by : ', !data.team)
+        console.log(rooms[room].players[data.team])
         socket.to(rooms[room].players[data.team]).emit('turn', {click: {x: data.click.x, y:data.click.y}})
+        console.log('turn: ', !data.team)
         // console.log()
     })
     

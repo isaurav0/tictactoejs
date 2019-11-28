@@ -1,9 +1,9 @@
 var gameStart = false
-const socket = io.connect("localhost:3000");
+const socket = io.connect("192.168.0.5:3000");
 var chosen = '';
 var myturn = false;
 var room = '';
-
+var origteam ;
 
 //background image
 var image = new Image();
@@ -15,7 +15,6 @@ const gap = 8;
 var gameOver = false;
 var start = true;
 var okayToMove = true;
-// var team = true;
 
 
 unchecked=[]
@@ -23,15 +22,17 @@ var invalid = false;
 
 
 //game Type 
-multiplayer = true;
+var multiplayer = true;
 var online = true;
+
+if((multiplayer && !online) || !multiplayer)
+    team = true
 
 
 //setup multiplayer
 function respond(choice){
     var roomname = document.getElementById('roomname').value;
     if(choice=='create' && roomname.length!=0){
-        console.log('room created: ',roomname);
         socket.emit('create', roomname);
         console.log('waiting');
         chosen = choice
@@ -50,9 +51,13 @@ socket.on('gameStart', (data)=>{
         console.log('game Start Now');
         room = data.room;
         gameStart = true;
-        myturn = chosen=='create';
-        team = myturn;
-        turn(team);
+        origteam = chosen=='create';
+        myturn = origteam;
+        team = origteam;
+        if(myturn)
+            turn(origteam);
+        else
+            turn(!origteam)
     }
     else{
         console.log('room is full.')
@@ -61,10 +66,12 @@ socket.on('gameStart', (data)=>{
 })
 
 socket.on('turn', function(recieved){
+    console.log('turn came')
     myturn = true
     team = !team
     console.log('previous click: ', recieved.click)
-    userplay(recieved.click)
+    userplay(recieved.click, !origteam)
+    ctx.fillText('*', recieved.click.x, recieved.click.y)
 })
 
 
@@ -77,7 +84,7 @@ canvas.width = window.innerWidth;
 canvas.position = "absolute";
 
 
-
+ 
 //start game
 image.onload = function(){
     ctx.drawImage(image, 300, 100, 500,500);
@@ -85,8 +92,9 @@ image.onload = function(){
     ystart = 100;
     window.addEventListener("click", e => {
         if(!multiplayer){
+            console.log(!gameOver, team, okayToMove)
             if(!gameOver && team && okayToMove){
-                userplay(e);
+                userplay(e, team);
                 // wait(1000);
             }
             // wait(1000);
@@ -97,17 +105,25 @@ image.onload = function(){
         }
         else if(multiplayer && !online){
             if(!gameOver){
-                userplay(e);
+                userplay(e, team);
             }
         }
         else{
             if(gameStart){
-                console.log(myturn)
+                okayToMove = true
+                console.log('my turn: ', myturn)
                 if(!gameOver && myturn){
-                    console.log('clicked')
-                    userplay(e);
-                    myturn = false;
-                    socket.emit("turn", { team, click: {x: e.x, y: e.y} });
+                    console.log('moved')
+                    userplay(e, origteam);
+                    if(okayToMove){
+                        myturn = false;
+                        if(myturn)
+                            turn(origteam);
+                        else
+                            turn(!origteam)
+                        socket.emit("turn", { team: !origteam, click: {x: e.x, y: e.y}, room });
+                        console.log('turn of another')
+                    }
                 }
             }
         }
@@ -192,47 +208,46 @@ box[8] = box8
 box[9] = box9
 
 //gameplay
-function userplay(e){
-    console.log(e.x, e.y)
+function userplay(e, player){
 
     //clear error
     ctx.fillStyle = "Black";
     ctx.fillRect(378,613, 800,608);
 
     if(e.x>xstart && e.x<xstart+width && e.y>ystart && e.y<ystart+width && !box1.checked){
-        check(box[1], team)
+        check(box[1], player)
     }
 
     else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart && e.y<ystart+width && !box2.checked){
-        check(box[2],team)
+        check(box[2],player)
     }
 
     else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart && e.y<ystart+width && !box3.checked){
-        check(box[3], team)
+        check(box[3], player)
     }
 
     else if(e.x>xstart && e.x<xstart+width && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box4.checked){
-        check(box[4], team)
+        check(box[4], player)
     }
 
     else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box5.checked){
-        check(box[5], team)
+        check(box[5], player)
     }
 
     else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+width+gap && e.y<ystart+2*width+gap && !box6.checked){
-        check(box[6], team)
+        check(box[6], player)
     }
     
     else if(e.x>xstart && e.x<xstart+width && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box7.checked){
-        check(box[7], team)
+        check(box[7], player)
     }
     
     else if(e.x>xstart+width+gap && e.x<xstart+2*width+gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box8.checked){
-        check(box[8], team)
+        check(box[8], player)
     }
 
     else if(e.x>xstart+2*width+2*gap && e.x<xstart+3*width+2*gap && e.y>ystart+2*width+2*gap && e.y<ystart+3*width+2*gap && !box9.checked){
-        check(box[9], team)
+        check(box[9], player)
     }
 
     else{
@@ -246,9 +261,10 @@ function userplay(e){
     }
 
     //for single player
-    okayToMove = !okayToMove
-    
-    team = !team
+    if((!online)){//review this line
+        okayToMove = !okayToMove
+        team = !team
+    }
 };
 
 
@@ -279,15 +295,15 @@ function turn(team){
         ctx.fillStyle = "black";
         ctx.fillRect(820,290,945,290)
         ctx.fillStyle = "orange";
-        ctx.font = "30px Arial"
-        ctx.fillText("X",62,350);
+        ctx.font = "40px Arial"
+        ctx.fillText("×",62,350);
     }
     if(!team){
         ctx.fillStyle = "black";
         ctx.fillRect(34,290,155,290)
         ctx.fillStyle = "green";
-        ctx.font = "30px Arial"
-        ctx.fillText("O",1000,350);
+        ctx.font = "25px Arial"
+        ctx.fillText("◯",1000,350);
     }
 }
 
@@ -296,8 +312,15 @@ function turn(team){
 //if game over
 window.onclick=function(){
     if(gameOver){
-        console.log('gameOver')
-        location.reload();
+        if(!online){
+            console.log('gameOver')
+            location.reload();
+        }
+        else{
+            this.location.reload();
+            console.log('previous room name: ', this.room)
+        }
+        
     }
 }
 
@@ -308,15 +331,23 @@ function check(box, team){
     box.checked = true
     if(team==true){
         ctx.fillStyle = 'orange';
-        ctx.fillText("X",box.x,box.y);
+        ctx.fillText("×",box.x,box.y);
     }
     if(team==false){
         ctx.fillStyle = 'green';
-        ctx.fillText("O", box.x, box.y);
+        ctx.fillText("◯", box.x, box.y);
     }
     checkWinner();
-    if(!gameOver)
-        turn(!team);
+    if(!gameOver){
+        if(!online){
+            turn(!team);
+        }
+        else{
+            turn(!origteam);
+        }
+    }
+    
+    
     // wait(1000)
 }
 
@@ -335,14 +366,7 @@ function checkWinner(){
             ctx.moveTo(startx+(i-1)*(width+gap),108);
             ctx.lineTo(startx+(i-1)*(width+gap), 605);
             ctx.lineWidth = "8";
-            if(team){
-                ctx.strokeStyle ="orange";
-                ctx.stroke();
-            }
-            if(!team){
-                ctx.strokeStyle ="green";
-                ctx.stroke();
-            }
+            drawline();
             gameOver= true;
             console.log('gameOver')
         }
@@ -356,14 +380,7 @@ function checkWinner(){
             ctx.moveTo(293,starty+(i-1)*(width+gap));
             ctx.lineTo(800, starty+(i-1)*(width+gap));
             ctx.lineWidth = "8";
-            if(team){
-                ctx.strokeStyle ="orange";
-                ctx.stroke();
-            }
-            if(!team){
-                ctx.strokeStyle ="green";
-                ctx.stroke();
-            }
+            drawline();
             gameOver=true;
             console.log('gameOver')
         }
@@ -376,14 +393,7 @@ function checkWinner(){
             ctx.moveTo(296,112);
             ctx.lineTo(802, 585);
             ctx.lineWidth = "8";
-            if(team){
-                ctx.strokeStyle ="orange";
-                ctx.stroke();
-            }
-            if(!team){
-                ctx.strokeStyle ="green";
-                ctx.stroke();
-            }
+            drawline();
             gameOver= true;
             console.log('gameOver')
         }
@@ -395,14 +405,7 @@ function checkWinner(){
             ctx.moveTo(798,109);
             ctx.lineTo(297, 591);
             ctx.lineWidth = "8";
-            if(team){
-                ctx.strokeStyle ="orange";
-                ctx.stroke();
-            }
-            if(!team){
-                ctx.strokeStyle ="green";
-                ctx.stroke();
-            }
+            drawline();
             gameOver= true;
             console.log('gameOver')
         }
@@ -432,3 +435,20 @@ function wait(ms){
       end = new Date().getTime();
    }
 };
+
+function drawline(){
+    if(!online){
+        if(team){
+            ctx.strokeStyle ="orange";
+            ctx.stroke();
+        }
+        if(!team){
+            ctx.strokeStyle ="green";
+            ctx.stroke();
+        }
+    }
+    else{
+        ctx.strokeStyle
+    }
+    
+}
