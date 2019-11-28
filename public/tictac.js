@@ -1,35 +1,66 @@
 var gameStart = false
 const socket = io.connect("localhost:3000");
+var chosen = '';
+var myturn = false;
+
+
+//background image
+var image = new Image();
+image.src = "black.png";
+
+//required
+const width = 160;
+const gap = 8;
+var gameOver = false;
+var start = true;
+var okayToMove = true;
+// var team = true;
+
+
+unchecked=[]
+var invalid = false;
+
+
+//game Type 
+multiplayer = true;
+var online = true;
+
 
 //setup multiplayer
 function respond(choice){
     var roomname = document.getElementById('roomname').value;
     if(choice=='create' && roomname.length!=0){
-        console.log('room created: ',roomname)
+        console.log('room created: ',roomname);
         socket.emit('create', roomname);
-        socket.on('wait', (success)=>{
-            if(success)
-                console.log('waiting')
-            else
-                console.log('room already exists')
-        })
+        console.log('waiting');
+        chosen = choice
     }
     else{
         socket.emit('join', roomname);
-        console.log('room joined: ', roomname)
+        console.log('room joined: ', roomname);
+        chosen = choice
     }
 }
+
 
 
 socket.on('gameStart', (success)=>{
     if(success){
         console.log('game Start Now');
-        gameStart = true
+        gameStart = true;
+        myturn = chosen=='create'
+        team = myturn
+        turn(team);
     }
     else{
         console.log('room is full.')
         gameStart = false
     }
+})
+
+socket.on('turn', function(recieved){
+    var myturn = true
+    console.log('previous click: ', recieved.click)
 })
 
 
@@ -43,47 +74,36 @@ canvas.position = "absolute";
 
 
 
-
-//background image
-var image = new Image();
-image.src = "black.png";
-
-//required
-var team = true;
-const width = 160;
-const gap = 8;
-var gameOver = false;
-var start = true;
-var okayToMove = true;
-
-
-unchecked=[]
-var invalid = false;
-turn(team);
-multiplayer = true;
-
-
 //start game
 image.onload = function(){
     ctx.drawImage(image, 300, 100, 500,500);
     xstart = 300;
     ystart = 100;
     window.addEventListener("click", e => {
-        if(gameStart){
-            if(!multiplayer){
-                if(!gameOver && team && okayToMove){
-                    userplay(e);
-                    // wait(1000);
-                }
+        if(!multiplayer){
+            if(!gameOver && team && okayToMove){
+                userplay(e);
                 // wait(1000);
-                if(!gameOver && !invalid && !team){
-                    setTimeout(()=>moveAI(),1000)
-                }
-                invalid = false; 
             }
-            else{
-                if(!gameOver){
+            // wait(1000);
+            if(!gameOver && !invalid && !team){
+                setTimeout(()=>moveAI(),1000)
+            }
+            invalid = false; 
+        }
+        else if(multiplayer && !online){
+            if(!gameOver){
+                userplay(e);
+            }
+        }
+        else{
+            if(gameStart){
+                console.log(myturn)
+                if(!gameOver && myturn){
+                    console.log('clicked')
                     userplay(e);
+                    var myturn = false;
+                    socket.emit("turn", { team, click: [e.x, e.y] });
                 }
             }
         }
@@ -169,7 +189,7 @@ box[9] = box9
 
 //gameplay
 function userplay(e){
-    // console.log(e.x, e.y)
+    console.log(e.x, e.y)
 
     //clear error
     ctx.fillStyle = "Black";
@@ -225,7 +245,6 @@ function userplay(e){
     okayToMove = !okayToMove
     
     team = !team
-    console.log(team)
 };
 
 
