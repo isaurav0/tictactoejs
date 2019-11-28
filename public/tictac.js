@@ -2,6 +2,7 @@ var gameStart = false
 const socket = io.connect("localhost:3000");
 var chosen = '';
 var myturn = false;
+var room = '';
 
 
 //background image
@@ -44,12 +45,13 @@ function respond(choice){
 
 
 
-socket.on('gameStart', (success)=>{
-    if(success){
+socket.on('gameStart', (data)=>{
+    if(data.success){
         console.log('game Start Now');
+        room = data.room;
         gameStart = true;
-        myturn = chosen=='create'
-        team = myturn
+        myturn = chosen=='create';
+        team = myturn;
         turn(team);
     }
     else{
@@ -59,8 +61,10 @@ socket.on('gameStart', (success)=>{
 })
 
 socket.on('turn', function(recieved){
-    var myturn = true
+    myturn = true
+    team = !team
     console.log('previous click: ', recieved.click)
+    userplay(recieved.click)
 })
 
 
@@ -102,8 +106,8 @@ image.onload = function(){
                 if(!gameOver && myturn){
                     console.log('clicked')
                     userplay(e);
-                    var myturn = false;
-                    socket.emit("turn", { team, click: [e.x, e.y] });
+                    myturn = false;
+                    socket.emit("turn", { team, click: {x: e.x, y: e.y} });
                 }
             }
         }

@@ -19,20 +19,21 @@ io = socket(server)
 //     }
 // }
 
-rooms = []
+rooms = {}
 
-players ={}
 
 io.on('connection', (socket)=>{
     
     //create room 
     socket.on('create', room=>{
-        if(!rooms.includes(room)){
-            rooms.push(room)
+        if(!Object.keys(rooms).includes(room)   ){
+            // rooms.push(room)
+            rooms[room] = {}
+            rooms[room].players = {}
             socket.join(room)
             console.log('created room: '+room)
-            players['true'] = socket.id
-            console.log(players)
+            rooms[room].players['true'] = socket.id
+            console.log(rooms[room].players)
             io.sockets.in(room).emit('wait', true)
         }
         else{
@@ -42,29 +43,28 @@ io.on('connection', (socket)=>{
     })
 
     socket.on('join', room=>{
-        console.log(!players['false'])
-        if(rooms.includes(room) && !players['false']){
+        if(Object.keys(rooms).includes(room) && !rooms[room].players['false']){
             socket.join(room)
-            players['false'] = socket.id
-            io.sockets.in(room).emit('gameStart', true);
-            console.log(players)
+            rooms[room].players['false'] = socket.id
+            io.sockets.in(room).emit('gameStart', {room, success: true});
+            console.log(rooms[room].players)
             // io.to(players['p1'].emit('turn', true))
         }
         else{
-            socket.emit('gameStart', false)
+            socket.emit('gameStart',false)
             console.log('room is full')
         }
     })
 
-    socket.on("disconnect", room=> {
-        rooms.pop(room)
-        console.log('disconnected')
-    })
+    // socket.on("disconnect", room=> {
+    //     delete rooms[room]
+    //     console.log('disconnected')
+    // })
 
     socket.on('turn', (data)=>{
         console.log('team : ', data.team)
-        console.log('click: ', data.click)
-        socket.to(players[data.team]).emit('turn', {click: data.click})
+        console.log('click: ', data.click.x)
+        socket.to(rooms[room].players[data.team]).emit('turn', {click: {x: data.click.x, y:data.click.y}})
         // console.log()
     })
     
