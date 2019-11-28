@@ -23,7 +23,7 @@ var invalid = false;
 
 //game Type 
 var multiplayer = true;
-var online = true;
+var online = false;
 
 if((multiplayer && !online) || !multiplayer)
     team = true
@@ -71,7 +71,6 @@ socket.on('turn', function(recieved){
     team = !team
     console.log('previous click: ', recieved.click)
     userplay(recieved.click, !origteam)
-    ctx.fillText('*', recieved.click.x, recieved.click.y)
 })
 
 
@@ -91,6 +90,7 @@ image.onload = function(){
     xstart = 300;
     ystart = 100;
     window.addEventListener("click", e => {
+        console.log(e.x, e.y)
         if(!multiplayer){
             console.log(!gameOver, team, okayToMove)
             if(!gameOver && team && okayToMove){
@@ -326,18 +326,19 @@ window.onclick=function(){
 
 
 function check(box, team){
-    ctx.font = "100px Arial";
     box.team = team;
     box.checked = true
     if(team==true){
+        ctx.font = "150px Arial";
         ctx.fillStyle = 'orange';
         ctx.fillText("×",box.x,box.y);
     }
     if(team==false){
+        ctx.font = "90px Arial";
         ctx.fillStyle = 'green';
         ctx.fillText("◯", box.x, box.y);
     }
-    checkWinner();
+    checkWinner(team);
     if(!gameOver){
         if(!online){
             turn(!team);
@@ -353,7 +354,7 @@ function check(box, team){
 
 
 
-function checkWinner(){
+function checkWinner(team){
     var k =0;
     var flag = 0;
     for(i=1;i<4;i++){
@@ -361,12 +362,12 @@ function checkWinner(){
         if(box[i].checked && box[i+3].checked && box[i+6].checked && box[i].team==box[i+3].team && box[i].team==box[i+6].team)
         {
             ctx.beginPath();
-            startx = 370;
+            startx = 387;
             starty = 108;
             ctx.moveTo(startx+(i-1)*(width+gap),108);
             ctx.lineTo(startx+(i-1)*(width+gap), 605);
             ctx.lineWidth = "8";
-            drawline();
+            drawline(team);
             gameOver= true;
             console.log('gameOver')
         }
@@ -380,7 +381,7 @@ function checkWinner(){
             ctx.moveTo(293,starty+(i-1)*(width+gap));
             ctx.lineTo(800, starty+(i-1)*(width+gap));
             ctx.lineWidth = "8";
-            drawline();
+            drawline(team);
             gameOver=true;
             console.log('gameOver')
         }
@@ -393,7 +394,7 @@ function checkWinner(){
             ctx.moveTo(296,112);
             ctx.lineTo(802, 585);
             ctx.lineWidth = "8";
-            drawline();
+            drawline(team);
             gameOver= true;
             console.log('gameOver')
         }
@@ -405,7 +406,7 @@ function checkWinner(){
             ctx.moveTo(798,109);
             ctx.lineTo(297, 591);
             ctx.lineWidth = "8";
-            drawline();
+            drawline(team);
             gameOver= true;
             console.log('gameOver')
         }
@@ -436,8 +437,7 @@ function wait(ms){
    }
 };
 
-function drawline(){
-    if(!online){
+function drawline(team){
         if(team){
             ctx.strokeStyle ="orange";
             ctx.stroke();
@@ -446,9 +446,5 @@ function drawline(){
             ctx.strokeStyle ="green";
             ctx.stroke();
         }
-    }
-    else{
-        ctx.strokeStyle
-    }
     
 }
