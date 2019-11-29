@@ -1,5 +1,9 @@
 # Tic Tac Toe 
-A simple multiplayer game made using html5 canvas and JavaScript
+A simple game made using html5 canvas and JavaScript
+Can be played in three modes:
+  i.    Single Player
+  ii.   Multiplayer Offline
+  iii.  Multiplayer Online 
 
 
 
